@@ -1,4 +1,4 @@
-name: CastEnv
+name: AstroCast
 channels:
   - anaconda
   - pytorch
