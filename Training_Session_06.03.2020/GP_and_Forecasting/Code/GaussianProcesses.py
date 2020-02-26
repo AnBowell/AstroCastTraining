@@ -11,7 +11,7 @@ Module that takes and input of two numpy arrays.
 X : Days since the first measurement. Eg (0,7,14). 
 Y : VCI Values. Eg (10.1,20.3,34.5).
 
-ACTION
+PROCESS
 
 Using an RBF kernel GP is performed on the time series creating a distribution at each time step.
 

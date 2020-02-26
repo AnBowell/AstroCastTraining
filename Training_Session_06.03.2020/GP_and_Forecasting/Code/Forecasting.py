@@ -4,18 +4,32 @@ Created on Mon Nov 18 17:30:33 2019
 
 @author: Andrew
 
-This functions is the mediator between the main body of code and the GP code.
-
-When processed, the data will have the basic format of a date and a VCI, whereas the GP code works with data in the format of daynumber and VCI.
+This function is the mediator between the main body of code and the GP code.
 
 
-This function essentially converts the daily date input into a weekly day number input.
-e.g (12-12-2005,34.56) --> (1740,34.56) and then converts the GP output back into a date and value. 
+INPUT
 
+Three numpy arrays of daily frequency.
 
+Dates : Dates of data points E.g. (12-12-12,13-12-12) 
+VCI1W : The 7-Day VCI average (10.4,15.4)
+VCI3M : The 3-Month VCI Average (30.3,40.6)
 
+PROCESS
+Converts input dates into single figure days since values then runs the GP function. 
+Once output from GP function has been recieved, it converts days since back to dates.
+
+OUTPUT
+
+Four numpy arrays of weekly frequency.
+
+PredictedTimeStamps : Dates of predicted data points E.g. (14-12-12,21-12-12)
+Dates : Dates of all previous data E.g.(12-12-12,13-12-12)
+VCI3M : Previous VCI3M values E.g. (30.3,40.6)
+PredictedVCI3M : Predicted VCI3M at weekly intervals E.g. (45.5,46.3)
 
 """
+
 #Importing modules
 
 import numpy as np
@@ -30,9 +44,8 @@ import GaussianProcesses
 
 def GetForecastVCI(Dates,VCI1W,VCI3M):
     
-    
-   
-    #Computational speed up. Removing start data so that we can divide by 7.
+       
+    # Computational speed up. Removing start data so that we can divide by 7.
     
     ToRemove = (len(VCI1W) % 7)
     
@@ -60,18 +73,17 @@ def GetForecastVCI(Dates,VCI1W,VCI3M):
         day_of_year = datetime.strptime(item, '%d-%m-%Y').timetuple().tm_yday
         Days.append((int(day_of_year+(int(Year)*(365.25)))))
 
-
-    VCI = VCI1W
     # The list of days is then turned into an array, and any nan values from VCI removed.
+    
     Days = np.array(Days)
-    Mask = np.isnan(VCI)
+    Mask = np.isnan(VCI1W)
     VCI = VCI[~Mask]
     
-    # The data is then fed into the GP code that Steven wrote.
+    # The data is then fed into the GP module
     
     mean,Xtest_use = GaussianProcesses.forecast(Days,VCI)
     
-    # The results are then put into the form needed.
+    # The output of the module is then seperated into past and future data.
     
     use = Xtest_use >= np.max(Days)
     fc = Xtest_use - np.max(Days)
@@ -88,7 +100,7 @@ def GetForecastVCI(Dates,VCI1W,VCI3M):
     PredictedVCI=np.insert(PredictedValues,0,VCI[-1])
 
     # The predicted days ahead are then converted back into dates.
-    # Two chuncks of code. One for the predicted time stamps, one for rest of the data
+    # Two chunks of code. One for the predicted time stamps, one for rest of the previous data
 
     PredictedTimeStamps = []
     for PredictedTimeStamp in PredictedDates:
@@ -104,13 +116,11 @@ def GetForecastVCI(Dates,VCI1W,VCI3M):
         dt = julian.from_jd(mjd, fmt='mjd')
         Dates.append(dt)
         
-        
+    # Empty array made to store the VCI3M in    
     VCI3MfromVCI1W = np.empty((11))
     
     # The following loops over the weeks of known VCI1W data and our predicted VCI1W data to create
     # A VCI3M running average.
-    
-    
 
     for WeekCounter,item in enumerate(PredictedVCI):
     
