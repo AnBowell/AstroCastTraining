@@ -6,7 +6,6 @@ Created on Mon Nov 18 17:59:36 2019
 
 This module is for plotting the graph. And saving as PDF
 
-
 The PDF function takes the predicted dates, VCI3M values and the previous values and dates.
 
 The County and errors are also fed in as an input.
@@ -114,8 +113,6 @@ def PDF(PredictedTimeStamps3m,PredictedValues3m,Dates3m,VCI3M,eb,county):
     ax4.axhspan(35, 50, alpha=0.5, color='limegreen')
     ax4.axhspan(50, 102, alpha=0.5, color='darkgreen')
     ax4.set_title(str(county)+' VCI3M',fontsize=20)
-           
-    
     ax4.legend()
     
 

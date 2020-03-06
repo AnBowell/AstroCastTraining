@@ -74,7 +74,7 @@ def GetForecastVCI(Dates,VCI1W,VCI3M):
         Days.append((int(day_of_year+(int(Year)*(365.25)))))
 
     # The list of days is then turned into an array, and any nan values from VCI removed.
-    
+    VCI = VCI1W
     Days = np.array(Days)
     Mask = np.isnan(VCI1W)
     VCI = VCI[~Mask]
